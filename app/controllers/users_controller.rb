@@ -16,7 +16,8 @@ class UsersController < ApplicationController
   end
   
   def create
-    @user = User.new(user_params)
+    @user = User.new(user_params,)
+    @user.image_name = "default_user.jpg"
 
     if @user.save
       flash[:success] = 'ユーザを登録しました。'
@@ -24,6 +25,36 @@ class UsersController < ApplicationController
     else
       flash.now[:danger] = 'ユーザの登録に失敗しました。'
       render :new
+    end
+  end
+  
+  def destroy
+    @user = User.find_by(id: params[:id])
+    @user.destroy
+    flash[:success] = 'ユーサーを削除しました。'
+    redirect_to(root_path)
+  end
+  
+  def edit
+    @user = User.find(params[:id])
+  end
+  
+  def update
+    @user = User.find_by(id: params[:id])
+    @user.name = params[:name]
+    @user.email = params[:email]
+
+    if params[:image]
+      @user.image_name = "#{@user.id}.jpg"
+      image = params[:image]
+      File.binwrite("public/user_images/#{@user.image_name}", image.read)
+    end
+    
+    if @user.save
+      flash[:notice] = "ユーザー情報を編集しました"
+      redirect_to("/users/#{@user.id}")
+    else
+      render("users/edit")
     end
   end
   
